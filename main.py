@@ -25,7 +25,6 @@ def add_apt_packages():
         "build-essential",
         "calibre",
         "curl",
-        "git",
         "htop",
         "libfuse2",
         "mmv",
@@ -48,7 +47,6 @@ def add_apt_packages():
 
 def install_neovim():
 
-    os.mkdir(HOME_PATH.joinpath("apps"))
     repo_is_cloned = gitClone("https://github.com/neovim/neovim", HOME_PATH.joinpath("apps/neovim"))
     if not repo_is_cloned:
         print("Could not install neovim")
