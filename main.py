@@ -1,11 +1,17 @@
-import os, shlex, subprocess
+import os
+import shlex, subprocess
 from pathlib import Path
 
+
 HOME_PATH = Path.home()
+CPU_COUNT = os.cpu_count()
 
 
-def exec(cmd: str, capture_output: bool = True) -> subprocess.CompletedProcess:
-    return subprocess.run(shlex.split(cmd), capture_output=capture_output)
+def exec(cmd: str, capture_output: bool = True, cwd: Path | None = None) -> subprocess.CompletedProcess:
+    if cwd:
+        return subprocess.run(shlex.split(cmd), capture_output=capture_output, text=True, cwd=cwd)
+    return subprocess.run(shlex.split(cmd), capture_output=capture_output, text=True)
+
 
 def append_to_profile():
     screen = """#Added for my very old slot machine monitor
@@ -16,25 +22,23 @@ xrandr --addmode eDP-1 "1920x1080_60.00"
 
 
 def gitClone(repo: str, saveTo: Path):
-    print(f"Cloning repo {repo} to {str(saveTo)}")
     clone_result = exec(f"git clone {repo} {str(saveTo)}")
-
     if clone_result.returncode == 0:
-        print(f"Successfully cloned to {str(saveTo)}")
         return True
-
-    print(f"Error while cloning repo: {clone_result.stderr.decode('utf-8')}")
     return False
+
 
 def add_apt_repos():
     repos = [
-        "sudo apt-add-repository ppa:fish-shell/release-3 -y",
+        "ppa:fish-shell/release-3",
     ]
     for repo in repos:
-        result = exec(repo)
+        print(f"info: adding repository {repo}")
+        result = exec(f"sudo apt-add-repository {repo} -y")
         if result.returncode != 0:
             print(result)
             return False
+    return True
 
 
 def add_apt_packages():
@@ -58,16 +62,32 @@ def add_apt_packages():
         "valgrind",
         "vlc",
     ]
-    return exec("sudo apt-get install -y " + " ".join(pkgs))
+    for pkg in pkgs:
+        print(f"info: installing {pkg}")
+        exec(f"sudo apt-get install -y {pkg}")
 
 
 def install_neovim():
-    repo_is_cloned = gitClone("https://github.com/neovim/neovim", HOME_PATH.joinpath("apps/neovim"))
+    def exec_in_neovim_path(cmd: str):
+        return exec(cmd, cwd=HOME_PATH.joinpath("apps/neovim"))
+
+    print(
+        f"info: cloning github.com/neovim/neovim to \
+        {HOME_PATH.joinpath('apps/neovim')}"
+    )
+    repo_is_cloned = gitClone(
+        "https://github.com/neovim/neovim",
+        HOME_PATH.joinpath("apps/neovim")
+    )
+
     if not repo_is_cloned:
         return False
-    exec("cd neovim && git checkout stable && make CMAKE_BUILD_TYPE=RelWithDebInfo")
-    result = exec("sudo make install")
-    print(result)
+    exec_in_neovim_path(
+        f"git checkout stable && make -j {CPU_COUNT} \
+        CMAKE_BUILD_TYPE=RelWithDebInfo"
+    )
+    exec_in_neovim_path("git checkout stable")
+    exec_in_neovim_path("sudo make install")
     return True
 
 
@@ -94,17 +114,7 @@ set -g status-fg white
 
 
 def main():
-    print("Installing apt packages")
-    result = add_apt_packages()
-    print(result)
-    if result.returncode == 0:
-        print("All apt packages were installed")
-    else:
-        print(result)
-
-    print("Installing Neovim")
     install_neovim()
-
 
 if __name__ == "__main__":
     main()
