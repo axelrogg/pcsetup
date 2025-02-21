@@ -1,5 +1,3 @@
-# Scripts to automate the setup of a new ubuntu machine
-
 # Some manual steps
 
 ## Create ssh keys and add them to GitHub
