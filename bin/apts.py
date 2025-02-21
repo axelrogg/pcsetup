@@ -6,6 +6,7 @@ import os
 # Get the project root (one level up from the 'bin' directory)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+
 from src.utils import exec
 
 
@@ -27,6 +28,7 @@ def add_apt_repos():
 def add_apt_packages():
     pkgs = [
         "build-essential",
+        "ca-certificates",
         "calibre",
         "cmake",
         "curl",

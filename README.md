@@ -1,5 +1,8 @@
 # Some manual steps
 
+Some manual steps are still necessary to make your new Ubuntu machine ready for
+business.
+
 ## Create ssh keys and add them to GitHub
 
 ### Create ssh keys
