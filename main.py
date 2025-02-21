@@ -1,5 +1,5 @@
+from utils import exec
 import os
-import shlex, subprocess
 from pathlib import Path
 
 
@@ -7,64 +7,9 @@ HOME_PATH = Path.home()
 CPU_COUNT = os.cpu_count()
 
 
-def exec(cmd: str, capture_output: bool = True, cwd: Path | None = None) -> subprocess.CompletedProcess:
-    if cwd:
-        return subprocess.run(shlex.split(cmd), capture_output=capture_output, text=True, cwd=cwd)
-    return subprocess.run(shlex.split(cmd), capture_output=capture_output, text=True)
-
-
-def append_to_profile():
-    screen = """#Added for my very old slot machine monitor
-xrandr --newmode "1920x1080_60.00"  172.80  1920 2040 2248 2576  1080 1081 1084 1118  -HSync +Vsync
-xrandr --addmode DP-1 "1920x1080_60.00"
-xrandr --addmode eDP-1 "1920x1080_60.00"
-"""
-
-
 def gitClone(repo: str, saveTo: Path):
     clone_result = exec(f"git clone {repo} {str(saveTo)}")
-    if clone_result.returncode == 0:
-        return True
-    return False
-
-
-def add_apt_repos():
-    repos = [
-        "ppa:fish-shell/release-3",
-    ]
-    for repo in repos:
-        print(f"info: adding repository {repo}")
-        result = exec(f"sudo apt-add-repository {repo} -y")
-        if result.returncode != 0:
-            print(result)
-            return False
-    return True
-
-
-def add_apt_packages():
-    pkgs = [
-        "build-essential",
-        "calibre",
-        "cmake",
-        "curl",
-        "gettext",
-        "htop",
-        "libfuse2",
-        "mmv",
-        "ninja-build",
-        "nodejs",
-        "npm",
-        "postgresql",
-        "thunderbird",
-        "tmux",
-        "tree",
-        "unzip",
-        "valgrind",
-        "vlc",
-    ]
-    for pkg in pkgs:
-        print(f"info: installing {pkg}")
-        exec(f"sudo apt-get install -y {pkg}")
+    return clone_result.returncode == 0
 
 
 def install_neovim():
