@@ -47,8 +47,7 @@ def add_apt_packages():
         "valgrind",
         "vlc",
     ]
-    for pkg in pkgs:
-        exec(f"apt-get install -y {pkg}")
+    exec(f"apt-get install -y {' '.join(pkgs)}")
 
 
 def main():
